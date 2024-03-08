@@ -1,16 +1,16 @@
 {
-    "name": "@cybercoder/keycloak-admin-client",
-    "version": "22.0.1",
-    "main": "./index.js",
-    "types": "./index.d.ts",
-    "license": "MIT",
-    "scripts": {
-        "build": "esbuild index.ts --platform=node --bundle --format=cjs --outfile=index.js"
-    },
-    "dependencies": {
-        "@keycloak/keycloak-admin-client": "^22.0.1"
-    },
-    "devDependencies": {
-        "esbuild": "^0.18.17"
-    }
+  "name": "@epsilon-data/keycloak-admin-client",
+  "version": "24.0.1",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild index.ts --platform=node --bundle --format=cjs --outfile=index.js"
+  },
+  "dependencies": {
+    "@keycloak/keycloak-admin-client": "^24.0.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.18.17"
+  }
 }
