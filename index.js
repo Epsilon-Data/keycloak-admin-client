@@ -19,7 +19,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // index.ts
 var keycloak_admin_client_exports = {};
 __export(keycloak_admin_client_exports, {
-  Keycloak: () => lib_default
+  KeycloakAdminClient: () => lib_default
 });
 module.exports = __toCommonJS(keycloak_admin_client_exports);
 
@@ -2671,5 +2671,5 @@ var RequiredActionAlias;
 var lib_default = KeycloakAdminClient;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  Keycloak
+  KeycloakAdminClient
 });
