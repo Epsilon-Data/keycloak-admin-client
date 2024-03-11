@@ -1,6 +1,6 @@
 {
   "name": "@epsilon-data/keycloak-admin-client",
-  "version": "24.0.2",
+  "version": "24.0.3",
   "main": "./index.js",
   "types": "./index.d.ts",
   "license": "MIT",
