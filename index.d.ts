@@ -5,11 +5,13 @@ import EventRepresentation from "@keycloak/keycloak-admin-client/lib/defs/eventR
 import RoleRepresentation from "@keycloak/keycloak-admin-client/lib/defs/roleRepresentation";
 import ClientRepresentation from "@keycloak/keycloak-admin-client/lib/defs/clientRepresentation";
 import ClientScopeRepresentation from "@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation";
+import ResourceRepresentation from "@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation";
 export {
   KeycloakAdminClient,
   Credentials,
   UserRepresentation,
   EventRepresentation,
+  ResourceRepresentation,
   RoleRepresentation,
   ClientRepresentation,
   ClientScopeRepresentation,
