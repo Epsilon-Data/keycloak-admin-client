@@ -9,6 +9,7 @@ import ResourceRepresentation from "@keycloak/keycloak-admin-client/lib/defs/res
 import PolicyRoleRepresentation from "@keycloak/keycloak-admin-client/lib/defs/policyRepresentation";
 import ClientQuery from "@keycloak/keycloak-admin-client/lib/defs/clientRepresentation";
 import GroupRepresentation from "@keycloak/keycloak-admin-client/lib/defs/groupRepresentation";
+import PolicyRepresentation from "@keycloak/keycloak-admin-client/lib/defs/policyRepresentation";
 
 export {
   KeycloakAdminClient,
@@ -22,4 +23,5 @@ export {
   PolicyRoleRepresentation,
   ClientQuery,
   GroupRepresentation,
+  PolicyRepresentation,
 };
