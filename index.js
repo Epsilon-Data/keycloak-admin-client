@@ -19,7 +19,10 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // index.ts
 var keycloak_admin_client_exports = {};
 __export(keycloak_admin_client_exports, {
-  KeycloakAdminClient: () => lib_default
+  DecisionEffect: () => DecisionEffect,
+  DecisionStrategy: () => DecisionStrategy,
+  KeycloakAdminClient: () => lib_default,
+  Logic: () => Logic
 });
 module.exports = __toCommonJS(keycloak_admin_client_exports);
 
@@ -2866,5 +2869,8 @@ var Logic;
 })(Logic || (Logic = {}));
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  KeycloakAdminClient
+  DecisionEffect,
+  DecisionStrategy,
+  KeycloakAdminClient,
+  Logic
 });
