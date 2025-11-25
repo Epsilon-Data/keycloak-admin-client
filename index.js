@@ -193,7 +193,8 @@ function parseTemplate(template) {
   };
 }
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/utils/fetchWithError.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/utils/fetchWithError.js
+var ERROR_FIELDS = ["error", "errorMessage"];
 var NetworkError = class extends Error {
   response;
   responseData;
@@ -207,7 +208,8 @@ async function fetchWithError(input, init) {
   const response = await fetch(input, init);
   if (!response.ok) {
     const responseData = await parseResponse(response);
-    throw new NetworkError("Network response was not OK.", {
+    const message = getErrorMessage(responseData);
+    throw new NetworkError(message, {
       response,
       responseData
     });
@@ -221,12 +223,24 @@ async function parseResponse(response) {
   const data = await response.text();
   try {
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
+    return data;
   }
-  return data;
+}
+function getErrorMessage(data) {
+  if (typeof data !== "object" || data === null) {
+    return "Unable to determine error message.";
+  }
+  for (const key of ERROR_FIELDS) {
+    const value = data[key];
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+  return "Network response was not OK.";
 }
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/utils/stringifyQueryParams.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/utils/stringifyQueryParams.js
 function stringifyQueryParams(params) {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -248,7 +262,7 @@ function stringifyQueryParams(params) {
   return searchParams.toString();
 }
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/agent.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/agent.js
 var SLASH = "/";
 var pick = (value, keys) => Object.fromEntries(Object.entries(value).filter(([key]) => keys.includes(key)));
 var omit = (value, keys) => Object.fromEntries(Object.entries(value).filter(([key]) => !keys.includes(key)));
@@ -339,7 +353,7 @@ var Agent = class {
     } else {
       requestOptions.body = payloadKey && typeof payload[payloadKey] === "string" ? payload[payloadKey] : JSON.stringify(payloadKey ? payload[payloadKey] : payload);
     }
-    if (!requestHeaders.has("content-type") && !(payload instanceof FormData)) {
+    if (requestOptions.body && !requestHeaders.has("content-type") && !(payload instanceof FormData)) {
       requestHeaders.set("content-type", "application/json");
     }
     if (queryParams) {
@@ -365,9 +379,9 @@ var Agent = class {
         return { [field]: resourceId };
       }
       if (Object.entries(headers || []).find(([key, value]) => key.toLowerCase() === "accept" && value === "application/octet-stream")) {
-        return res.arrayBuffer();
+        return await res.arrayBuffer();
       }
-      return parseResponse(res);
+      return await parseResponse(res);
     } catch (err) {
       if (err instanceof NetworkError && err.response.status === 404 && catchNotFound) {
         return null;
@@ -390,7 +404,7 @@ var Agent = class {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/resource.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/resource.js
 var Resource = class {
   #agent;
   constructor(client, settings = {}) {
@@ -408,7 +422,7 @@ var Resource = class {
   };
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/attackDetection.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/attackDetection.js
 var AttackDetection = class extends Resource {
   findOne = this.makeRequest({
     method: "GET",
@@ -436,7 +450,7 @@ var AttackDetection = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/authenticationManagement.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/authenticationManagement.js
 var AuthenticationManagement = class extends Resource {
   /**
    * Authentication Management
@@ -636,11 +650,23 @@ var AuthenticationManagement = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/cache.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/cache.js
 var Cache = class extends Resource {
   clearUserCache = this.makeRequest({
     method: "POST",
     path: "/clear-user-cache"
+  });
+  clearKeysCache = this.makeRequest({
+    method: "POST",
+    path: "/clear-keys-cache"
+  });
+  clearCrlCache = this.makeRequest({
+    method: "POST",
+    path: "/clear-crl-cache"
+  });
+  clearRealmCache = this.makeRequest({
+    method: "POST",
+    path: "/clear-realm-cache"
   });
   constructor(client) {
     super(client, {
@@ -653,7 +679,7 @@ var Cache = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/clientPolicies.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/clientPolicies.js
 var ClientPolicies = class extends Resource {
   constructor(client) {
     super(client, {
@@ -692,7 +718,7 @@ var ClientPolicies = class extends Resource {
   });
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/clients.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/clients.js
 var Clients = class extends Resource {
   find = this.makeRequest({
     method: "GET"
@@ -908,7 +934,7 @@ var Clients = class extends Resource {
     method: "GET",
     path: "/{id}/evaluate-scopes/generate-example-access-token",
     urlParamKeys: ["id"],
-    queryParamKeys: ["scope", "userId"]
+    queryParamKeys: ["scope", "userId", "audience"]
   });
   evaluateGenerateUserInfo = this.makeRequest({
     method: "GET",
@@ -1041,10 +1067,16 @@ var Clients = class extends Resource {
     path: "/{id}/authz/resource-server/policy/{type}",
     urlParamKeys: ["id", "type"]
   });
-  findOnePolicy = this.makeRequest({
+  findOnePolicyWithType = this.makeRequest({
     method: "GET",
     path: "/{id}/authz/resource-server/policy/{type}/{policyId}",
     urlParamKeys: ["id", "type", "policyId"],
+    catchNotFound: true
+  });
+  findOnePolicy = this.makeRequest({
+    method: "GET",
+    path: "/{id}/authz/resource-server/policy/{policyId}",
+    urlParamKeys: ["id", "policyId"],
     catchNotFound: true
   });
   listDependentPolicies = this.makeRequest({
@@ -1108,6 +1140,11 @@ var Clients = class extends Resource {
     method: "GET",
     path: "/{id}/authz/resource-server/resource/{resourceName}/scopes",
     urlParamKeys: ["id", "resourceName"]
+  });
+  listPermissionScope = this.makeRequest({
+    method: "GET",
+    path: "/{id}/authz/resource-server/permission/scope",
+    urlParamKeys: ["id"]
   });
   createAuthorizationScope = this.makeUpdateRequest({
     method: "POST",
@@ -1269,7 +1306,7 @@ var Clients = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/clientScopes.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/clientScopes.js
 var ClientScopes = class extends Resource {
   find = this.makeRequest({
     method: "GET",
@@ -1474,7 +1511,7 @@ var ClientScopes = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/components.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/components.js
 var Components = class extends Resource {
   /**
    * components
@@ -1520,7 +1557,7 @@ var Components = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/groups.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/groups.js
 var Groups = class extends Resource {
   find = this.makeRequest({
     method: "GET",
@@ -1529,6 +1566,7 @@ var Groups = class extends Resource {
       "q",
       "exact",
       "briefRepresentation",
+      "populateHierarchy",
       "first",
       "max"
     ]
@@ -1562,17 +1600,6 @@ var Groups = class extends Resource {
   count = this.makeRequest({
     method: "GET",
     path: "/count"
-  });
-  /**
-   * Set or create child.
-   * This will just set the parent if it exists. Create it and set the parent if the group doesn’t exist.
-   * @deprecated Use `createChildGroup` or `updateChildGroup` instead.
-   */
-  setOrCreateChild = this.makeUpdateRequest({
-    method: "POST",
-    path: "/{id}/children",
-    urlParamKeys: ["id"],
-    returnResourceIdInLocationHeader: { field: "id" }
   });
   /**
    * Creates a child group on the specified parent group. If the group already exists, then an error is returned.
@@ -1703,7 +1730,7 @@ var Groups = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/identityProviders.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/identityProviders.js
 var IdentityProviders = class extends Resource {
   /**
    * Identity provider
@@ -1802,7 +1829,7 @@ var IdentityProviders = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/realms.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/realms.js
 var Realms = class extends Resource {
   /**
    * Realm
@@ -2038,7 +2065,7 @@ var Realms = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/organizations.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/organizations.js
 var Organizations = class extends Resource {
   /**
    * Organizations
@@ -2063,7 +2090,6 @@ var Organizations = class extends Resource {
   });
   create = this.makeRequest({
     method: "POST",
-    path: "/",
     returnResourceIdInLocationHeader: { field: "id" }
   });
   delById = this.makeRequest({
@@ -2092,9 +2118,19 @@ var Organizations = class extends Resource {
     path: "/{orgId}/members/{userId}",
     urlParamKeys: ["orgId", "userId"]
   });
+  memberOrganizations = this.makeRequest({
+    method: "GET",
+    path: "/members/{userId}/organizations",
+    urlParamKeys: ["userId"]
+  });
   invite = this.makeUpdateRequest({
     method: "POST",
     path: "/{orgId}/members/invite-user",
+    urlParamKeys: ["orgId"]
+  });
+  inviteExistingUser = this.makeUpdateRequest({
+    method: "POST",
+    path: "/{orgId}/members/invite-existing-user",
     urlParamKeys: ["orgId"]
   });
   listIdentityProviders = this.makeRequest({
@@ -2115,7 +2151,33 @@ var Organizations = class extends Resource {
   });
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/roles.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/workflows.js
+var Workflows = class extends Resource {
+  constructor(client) {
+    super(client, {
+      path: "/admin/realms/{realm}/workflows",
+      getUrlParams: () => ({
+        realm: client.realmName
+      }),
+      getBaseUrl: () => client.baseUrl
+    });
+  }
+  find = this.makeRequest({
+    method: "GET",
+    path: "/"
+  });
+  create = this.makeRequest({
+    method: "POST",
+    returnResourceIdInLocationHeader: { field: "id" }
+  });
+  delById = this.makeRequest({
+    method: "DELETE",
+    path: "/{id}",
+    urlParamKeys: ["id"]
+  });
+};
+
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/roles.js
 var Roles = class extends Resource {
   /**
    * Realm roles
@@ -2222,7 +2284,7 @@ var Roles = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/serverInfo.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/serverInfo.js
 var ServerInfo = class extends Resource {
   constructor(client) {
     super(client, {
@@ -2242,7 +2304,7 @@ var ServerInfo = class extends Resource {
   });
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/users.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/users.js
 var Users = class extends Resource {
   find = this.makeRequest({
     method: "GET"
@@ -2543,7 +2605,7 @@ var Users = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/userStorageProvider.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/userStorageProvider.js
 var UserStorageProvider = class extends Resource {
   name = this.makeRequest({
     method: "GET",
@@ -2583,7 +2645,7 @@ var UserStorageProvider = class extends Resource {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/resources/whoAmI.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/resources/whoAmI.js
 var WhoAmI = class extends Resource {
   constructor(client) {
     super(client, {
@@ -2632,11 +2694,11 @@ function camelize(obj, shallow) {
   return typeof obj === "string" ? camelCase(obj) : walk(obj, shallow);
 }
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/utils/constants.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/utils/constants.js
 var defaultBaseUrl = "http://127.0.0.1:8180";
 var defaultRealm = "master";
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/utils/auth.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/utils/auth.js
 var bytesToBase64 = (bytes) => btoa(Array.from(bytes, (byte) => String.fromCodePoint(byte)).join(""));
 var toBase64 = (input) => bytesToBase64(new TextEncoder().encode(input));
 var encodeRFC3986URIComponent = (input) => encodeURIComponent(input).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
@@ -2677,7 +2739,7 @@ var getToken = async (settings) => {
   return camelize(data);
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/client.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/client.js
 var KeycloakAdminClient = class {
   // Resources
   users;
@@ -2685,6 +2747,7 @@ var KeycloakAdminClient = class {
   groups;
   roles;
   organizations;
+  workflows;
   clients;
   realms;
   clientScopes;
@@ -2715,6 +2778,7 @@ var KeycloakAdminClient = class {
     this.groups = new Groups(this);
     this.roles = new Roles(this);
     this.organizations = new Organizations(this);
+    this.workflows = new Workflows(this);
     this.clients = new Clients(this);
     this.realms = new Realms(this);
     this.clientScopes = new ClientScopes(this);
@@ -2770,7 +2834,7 @@ var KeycloakAdminClient = class {
   }
 };
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/defs/requiredActionProviderRepresentation.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/defs/requiredActionProviderRepresentation.js
 var RequiredActionAlias;
 (function(RequiredActionAlias2) {
   RequiredActionAlias2["VERIFY_EMAIL"] = "VERIFY_EMAIL";
@@ -2780,8 +2844,26 @@ var RequiredActionAlias;
   RequiredActionAlias2["TERMS_AND_CONDITIONS"] = "TERMS_AND_CONDITIONS";
 })(RequiredActionAlias || (RequiredActionAlias = {}));
 
-// node_modules/.pnpm/@keycloak+keycloak-admin-client@25.0.6/node_modules/@keycloak/keycloak-admin-client/lib/index.js
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/index.js
 var lib_default = KeycloakAdminClient;
+
+// node_modules/.pnpm/@keycloak+keycloak-admin-client@26.4.5/node_modules/@keycloak/keycloak-admin-client/lib/defs/policyRepresentation.js
+var DecisionStrategy;
+(function(DecisionStrategy2) {
+  DecisionStrategy2["AFFIRMATIVE"] = "AFFIRMATIVE";
+  DecisionStrategy2["UNANIMOUS"] = "UNANIMOUS";
+  DecisionStrategy2["CONSENSUS"] = "CONSENSUS";
+})(DecisionStrategy || (DecisionStrategy = {}));
+var DecisionEffect;
+(function(DecisionEffect2) {
+  DecisionEffect2["Permit"] = "PERMIT";
+  DecisionEffect2["Deny"] = "DENY";
+})(DecisionEffect || (DecisionEffect = {}));
+var Logic;
+(function(Logic2) {
+  Logic2["POSITIVE"] = "POSITIVE";
+  Logic2["NEGATIVE"] = "NEGATIVE";
+})(Logic || (Logic = {}));
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   KeycloakAdminClient

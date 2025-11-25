@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@keycloak/keycloak-admin-client':
-        specifier: ^25.0.6
-        version: 25.0.6
+        specifier: ^26.4.5
+        version: 26.4.5
     devDependencies:
       esbuild:
         specifier: ^0.18.17
@@ -150,8 +150,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@keycloak/keycloak-admin-client@25.0.6':
-    resolution: {integrity: sha512-rUvo6L0aT9+y/R2wFhDKb+lRD5rwj36XwnIGIbmC2HeQVfgroYB5u/79yc/Mo0inBFNIG8VuiwjRzU878fRE0Q==}
+  '@keycloak/keycloak-admin-client@26.4.5':
+    resolution: {integrity: sha512-I9BJSOInuPvWk5pJf9inJwWqNMA8LG/cryBVjaAObmD/b0spj/bLNO2Xqv10vB3wroD3aE68F1e6g+MXc9m+1Q==}
     engines: {node: '>=18'}
 
   camelize-ts@3.0.0:
@@ -239,7 +239,7 @@ snapshots:
   '@esbuild/win32-x64@0.18.20':
     optional: true
 
-  '@keycloak/keycloak-admin-client@25.0.6':
+  '@keycloak/keycloak-admin-client@26.4.5':
     dependencies:
       camelize-ts: 3.0.0
       url-join: 5.0.0
