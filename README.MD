@@ -12,7 +12,7 @@ npm install @epsilon-data/keycloak-admin-client
 
 ```bash
 npm version <version> --no-git-tag-version
-git add *;
+git add *
 git commit -m "Commit message"
 git push
 npm publish
